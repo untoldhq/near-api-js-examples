@@ -12,6 +12,8 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"dependencies": {
+		"buffer": "^6.0.3",
+		"near-api-js": "^0.44.2",
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2"
 	},
