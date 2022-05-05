@@ -56,7 +56,7 @@ const App: React.FC = () => {
 	}
 	const signOut = () => {
 		wallet?.signOut()
-		window.location.href = "/"
+		window.location.href = window.location + ''
 	}
 	
 	const signSimpleTransfer = async () => {
