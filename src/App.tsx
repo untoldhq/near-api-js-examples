@@ -35,8 +35,8 @@ const App: React.FC = () => {
       wallet.requestSignIn({
         contractId: CONTRACT_NAME,
         methodNames: ['nft_tokens_for_owner'],
-        successUrl: window.location + 'success',
-        failureUrl: window.location + 'fail'
+        successUrl: window.location + '',
+        failureUrl: window.location + ''
       });
       return
     }
