@@ -60,14 +60,14 @@ const App: React.FC = () => {
 	}
 	
 	const signSimpleTransfer = async () => {
-		let transfer = await createTransaction("untold.testnet", [transactions.transfer("1000000000000000000000000")])
+		let transfer = await createTransaction(undefined, "untold.testnet", [transactions.transfer("1000000000000000000000000")])
 		wallet?.requestSignTransactions({
 			transactions: [transfer]
 		})
 	}
 	
 	const signComplicatedTransfer = async () => {
-		let transfer = await createTransaction("sub.untold.testnet", [
+		let transfer = await createTransaction(undefined, "sub.untold.testnet", [
 			transactions.createAccount(),
 			transactions.transfer("1000000000000000000000000"),
 		])
@@ -78,7 +78,7 @@ const App: React.FC = () => {
 	
 	const signMultipart = async () => {
 		let id = "test-" + Date.now() + ".untold.testnet"
-		let transfer = await createTransaction(id, [
+		let transfer = await createTransaction(undefined, id, [
 			transactions.createAccount(),
 			transactions.transfer("1000000000000000000000000"),
 			transactions.deployContract(new Uint8Array([0]))
@@ -86,7 +86,7 @@ const App: React.FC = () => {
 		let keypair = KeyPair.fromRandom("ed25519")
 		let publicKey = keypair.getPublicKey()
 		let accessKey = transactions.fullAccessKey()
-		let fc = await createTransaction(id, [
+		let fc = await createTransaction(undefined, id, [
 			transactions.functionCall("mint_nft", {argOne: "something", anotherArg: "something else"}, 30000000, 1),
 			transactions.deployContract(new Uint8Array([0])),
 			transactions.addKey(publicKey, accessKey)
@@ -96,7 +96,28 @@ const App: React.FC = () => {
 		})
 	}
 	
-	const createTransaction = async (receiverId: string, actions: transactions.Action[], nonceOffset: number = 1): Promise<transactions.Transaction> =>  {
+	const signMultipartMultiSigner = async () => {
+		let id = "test-" + Date.now() + ".untold.testnet"
+		let transfer = await createTransaction(undefined, id, [
+			transactions.createAccount(),
+			transactions.transfer("1000000000000000000000000"),
+			transactions.deployContract(new Uint8Array([0]))
+		])
+		let keypair = KeyPair.fromRandom("ed25519")
+		let publicKey = keypair.getPublicKey()
+		let accessKey = transactions.fullAccessKey()
+		let fc = await createTransaction("another_id", id, [
+			transactions.functionCall("mint_nft", {argOne: "something", anotherArg: "something else"}, 30000000, 1),
+			transactions.deployContract(new Uint8Array([0])),
+			transactions.addKey(publicKey, accessKey)
+		], 2)
+		wallet?.requestSignTransactions({
+			transactions: [transfer, fc]
+		})
+	}
+	
+	
+	const createTransaction = async (signer: string | undefined, receiverId: string, actions: transactions.Action[], nonceOffset: number = 1): Promise<transactions.Transaction> =>  {
 		if (!wallet) {
 			throw new Error("no wallet")
 		}
@@ -117,7 +138,7 @@ const App: React.FC = () => {
 		const nonce = accessKey.access_key.nonce + nonceOffset
 	
 		return transactions.createTransaction(
-			wallet.account().accountId,
+			signer || wallet.account().accountId,
 			publicKey,
 			receiverId,
 			nonce,
@@ -136,7 +157,7 @@ const App: React.FC = () => {
 		}
 		<div>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signIn()}>Sign In</button>
-			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signInFullAccess()}>Sign With Full Access</button>
+			<a href="https://wallet.testnet.near.org/login/?success_url=https%3A%2F%2Funtoldhq.github.io%2Fnear-api-js-examples%2F&failure_url=https%3A%2F%2Funtoldhq.github.io%2Fnear-api-js-examples%2F&public_key=ed25519%3A8kA5hFjokczYDfF8SJD54QAno4AHefR2d4GHTnYahubj" className="rounded bg-indigo-500 p-2 m-4" onClick={() => signInFullAccess()}>Sign With Full Access</a>
 			{ wallet && wallet.isSignedIn() &&
 				<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signOut()}>Sign Out</button>
 			}
@@ -145,6 +166,7 @@ const App: React.FC = () => {
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signSimpleTransfer()}>Send Money</button>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signComplicatedTransfer()}>Sign Multi-action transaction</button>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signMultipart()}>Sign Multi-action Multi-transaction</button>
+			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signMultipartMultiSigner()}>Sign Invalid Transaction</button>
 		</div>
 	</div>
 }
