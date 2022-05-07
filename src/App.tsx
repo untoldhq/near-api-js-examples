@@ -41,19 +41,24 @@ const App: React.FC = () => {
       return
     }
 	}
-	const signInFullAccess = () => {
-		if (!wallet) {
-			return
-		}
 	
-		if (!wallet.isSignedIn()) {
-			wallet.requestSignIn({
-				successUrl: window.location + 'success',
-				failureUrl: window.location + 'fail'
-			});
-			return
-		}
+	const signInFullAccess = async () => {
+		const currentUrl = new URL(window.location.href)
+		let newUrl = new URL("https://wallet.testnet.near.org/login/?")
+		newUrl.searchParams.set('success_url', currentUrl.href);
+		newUrl.searchParams.set('failure_url', currentUrl.href);
+
+		const accessKey = KeyPair.fromRandom("ed25519");
+		newUrl.searchParams.set('public_key', accessKey.getPublicKey().toString());
+		await wallet?._near.config.keyStore.setKey("testnet", "pending_key" + accessKey.getPublicKey(), accessKey);
+		
+		window.location.href = newUrl.toString()
 	}
+	
+	const clearAllKeys = async () => {
+		wallet?._near.config.keyStore.clear()
+	}
+	
 	const signOut = () => {
 		wallet?.signOut()
 		window.location.href = window.location + ''
@@ -103,6 +108,8 @@ const App: React.FC = () => {
 			transactions: [transfer, fc]
 		})
 	}
+	
+
 	
 	const signMultipartMultiSigner = async () => {
 		let id = "test-" + Date.now() + ".untold.testnet"
@@ -165,10 +172,12 @@ const App: React.FC = () => {
 		}
 		<div>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signIn()}>Sign In</button>
-			<a href="https://wallet.testnet.near.org/login/?success_url=https%3A%2F%2Funtoldhq.github.io%2Fnear-api-js-examples%2F&failure_url=https%3A%2F%2Funtoldhq.github.io%2Fnear-api-js-examples%2F&public_key=ed25519%3A8kA5hFjokczYDfF8SJD54QAno4AHefR2d4GHTnYahubj" className="rounded bg-indigo-500 p-2 m-4" onClick={() => signInFullAccess()}>Sign With Full Access</a>
+			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signInFullAccess()}>Sign With Full Access</button>
 			{ wallet && wallet.isSignedIn() &&
 				<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signOut()}>Sign Out</button>
 			}
+			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => clearAllKeys()}>Clear All Keys (Debug)</button>
+
 		</div>
 		<div>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signSimpleTransfer()}>Send Money</button>
