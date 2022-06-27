@@ -186,6 +186,10 @@ const App: React.FC = () => {
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signMultipart()}>Sign Multi-action Multi-transaction</button>
 			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => signMultipartMultiSigner()}>Sign Invalid Transaction</button>
 		</div>
+
+		<div>
+			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => window.open("https://untoldhq.com")}>Open New Window</button>
+		</div>
 	</div>
 }
 export default App
