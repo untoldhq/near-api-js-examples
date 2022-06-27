@@ -188,7 +188,8 @@ const App: React.FC = () => {
 		</div>
 
 		<div>
-			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => window.open("https://untoldhq.com")}>Open New Window</button>
+			<button className="rounded bg-indigo-500 p-2 m-4" onClick={() => window.open("https://untoldhq.com")}>Open New Window (JS)</button>
+			<a className="rounded bg-indigo-500 p-2 m-4" href="https://untoldhq.com" target="_blank">Open New Window</a>
 		</div>
 	</div>
 }
